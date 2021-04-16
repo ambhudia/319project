@@ -4,6 +4,11 @@ from celluloid import Camera
 import plotter
 
 class VirtualPlotter(plotter.Plotter):
+    """
+    A diagnostic tool I used to visualise 
+    what the robot behaved like while I was waiting for
+    my Amazon delivery for parts
+    """
     def animate(self, a1s, a2s, name):
         self.fig, self.ax = plt.subplots(1,1)
         camera = Camera(self.fig)

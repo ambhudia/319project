@@ -1,5 +1,11 @@
 #include <Servo.h>
 
+// The servo library takes care of generating pulses, and its source code is found at
+// https://github.com/energia/Energia/blob/master/libraries/Servo/Servo.h
+// Note that the PWM range is not the same as that noted in the documentation
+// This is to keep the servo operating in the regime where the behaviour is not
+// significantly non-linear
+
 Servo servo1;
 Servo servo2;
 Servo servo3;             
@@ -23,10 +29,13 @@ String dataRef;  // if "a" angle 1, if "b" angle 2
 int flag = 0; 
 
 
-void raisePen(){
-  servo3.write(50);
+void raisePen(){ 
+// It just so happened that when I set up my robot, the pen was vertical
+// at 100 degrees and sufficiently raised as 30 degrees
+  servo3.write(30);
   Serial.println("Pen raised");
   }
+
 void lowerPen(){
   servo3.write(100);
   Serial.println("Pen lowered");
@@ -37,36 +46,43 @@ void lowerPen(){
 void setup()
 {
 
-  servo1.attach(P2_0);
-  servo2.attach(P2_2);
-  servo3.attach(P2_1);
-  servo1.write(180);
-  servo2.write(180);
-  raisePen();
-  Serial.begin(9600);  
+  servo1.attach(P2_0); // Register the ports of each servo
+  servo2.attach(P2_2); // It just so happened that I switched the connections
+  servo3.attach(P2_1); // when wring everything together (P2.1 <-> P2.2)
+  servo1.write(180);   // This is the rest position
+  servo2.write(180);   // 
+  raisePen();          // start robot wiht pen raised
+  Serial.begin(9600);  // begin allow serial I/o with 9600 baud rate
 } 
 
 void loop(){
   if (Serial.available() > 0) {
       // Only desire to do something if serial input received
-      data = Serial.readStringUntil('\n'); // Define delimiter
-      //data = data.replace("\n", "");  // Strip string of extraneous artifacts
+      data = Serial.readStringUntil('\n'); // Define delimiter to read up until
 
+      // dataref is the flag given to the microcontroller to let it know what
+      // we want it to do:
+      // "a": angle a1 input
+      // "b": angle a2 input
+      // "l": lower pen
+      // "r": raise pen
       dataRef = data.substring(0,1);
+
+
       // set corresponding variables by case, and update flags
       if (dataRef == "a") {
           a1 = data.substring(1,data.length()).toFloat();
-          flag = 1;
+          flag = 1; // we have received a valid a1
       } else if(dataRef == "b") {
-          if (flag==1) {
+          if (flag==1) { // set this onbly if we got angle a1
             a2 = data.substring(1,data.length()).toFloat();
-            flag = 2;
+            flag = 2; // we have received both angles
           }
           else { // received garbage, go to next iteration
-            flag = 0;
+            flag = 0;  // reset flag
             Serial.println("a1 not recieved");
             }
-      } else if(dataRef == "r") {
+      } else if(dataRef == "r") { 
           raisePen();
           flag = 0;
       } else if(dataRef == "l") {

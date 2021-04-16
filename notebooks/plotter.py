@@ -1,6 +1,13 @@
 import numpy as np
 
 class Plotter:
+    """
+    I wrote this class then interpolation was required to account for
+    differences in angular speed, and to smooth out splines.
+    
+    It turned out that my sampling rate was high enough that this 
+    was not needed
+    """
     def __init__(self, l1, l2):
         # it is assumed that both servos move with omega=1
         # thus the returned values are the corrections that 

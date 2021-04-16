@@ -1,24 +1,22 @@
 import numpy as np
-import math
 
-class Kinematics:
+class InvKinematics:
     def __init__(self, l1, l2):
         self.l1 = l1 # length of primary arm
         self.l2 = l2 # length of secondary arm
-        self.len2 = l1**2+l2**2
+        self.arm_lengths_sqr = l1**2+l2**2
         self.l1l2 = l1*l2
 
-    def _invert_array(self, x ,y):
-        a2 = np.arccos((x**2 + y**2 - self.len2)/(2*self.l1l2))
-        a1 = np.arctan(y/x)-np.arctan(self.l2*np.sin(a2)/(self.l1 +self.l2*np.cos(a2))) 
-        return a1, a2
-
     def invert(self, x, y):
-        if (type(x)==np.ndarray) and (type(y)==np.ndarray):
-            return self._invert_array(x ,y)
-        elif ((type(x)==list) and (type(y)==list)) or ((type(x)==tuple) and (type(y)==tuple)):
-            return self._invert_array(np.asarray(x), np.asarray(y))
-        else:
-            a2 = math.acos((x**2 + y**2 - self.len2)/(2*self.l1l2))
-            a1 = math.atan(y/x)-math.atan(self.l2*math.sin(a2)/(self.l1 +self.l2*math.cos(a2))) 
-            return a1, a2
+        """
+        x: Array-like or float
+        y: Array-like or float
+
+        The assumption is that y is never zero
+        """
+        arm_lengths_sqr = self.arm_lengths_sqr
+        l1l2 = self.l1l2
+        l3_sqr = x**2+y**2
+        a2 = np.pi - np.arccos(((arm_lengths_sqr)-(l3_sqr))/(2*l1l2))
+        a1 = +np.arctan(-x/y) + np.arcsin(self.l2/np.sqrt(l3_sqr)*np.sin(np.pi-a2))
+        return np.rad2deg(a1), np.rad2deg(a2)
